@@ -1,1 +1,8 @@
 .idea/
+/express_generator_myapp/node_modules
+/express_session-auth/node_modules
+/nodejs_cookie_tutorial/node_modules
+/nodejs_express/node_modules
+/nodejs_mysql/node_modules
+/nodejs_session/node_modules
+pm2_command.txt
