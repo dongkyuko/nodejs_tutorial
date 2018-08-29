@@ -18,6 +18,51 @@ app.use(session({
   store: new FileStore(),
 }));
 
+var authData = {
+  email:'blackdark13@naver.com',
+  //비밀번호 암호화
+  password:'1234',
+  nickname:'kodongkyu',
+};
+
+var passport = require('passport')
+  , LocalStrategy = require('passport-local').Strategy;
+
+//passport 미들웨어 사용
+app.use(passport.initialize());
+
+passport.use(new LocalStrategy(
+
+  //로그인 폼 name 수정
+  {
+    usernameField: 'email',
+    passwordField: 'pwd'
+  },
+
+  function(username, password, done) {
+
+    console.log('LocalStrategy', username, password);
+
+    if(username === authData.email){
+      if(password === authData.password){
+        console.log(authData);
+        return done(null, authData);
+      }
+      else {
+        return done(null, false, { message: 'Incorrect password.' });
+      }
+    } else {
+      return done(null, false, { message: 'Incorrect username.' });
+    }
+  }
+));
+
+app.post('/auth/login_process',
+passport.authenticate('local',
+{ successRedirect: '/',
+  failureRedirect: '/auth/login'
+}));
+
 app.get('*', function(request, response, next){
   fs.readdir('./data', function(error, filelist){
     request.list = filelist;
