@@ -7,6 +7,7 @@ var helmet = require('helmet')
 app.use(helmet());
 var session = require('express-session');
 var FileStore = require('session-file-store')(session);
+var flash = require('connect-flash');
 
 app.use(express.static('public'));
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -17,51 +18,9 @@ app.use(session({
   saveUninitialized: true,
   store: new FileStore(),
 }));
+app.use(flash());
 
-var authData = {
-  email:'blackdark13@naver.com',
-  //비밀번호 암호화
-  password:'1234',
-  nickname:'kodongkyu',
-};
-
-var passport = require('passport')
-  , LocalStrategy = require('passport-local').Strategy;
-
-//passport 미들웨어 사용
-app.use(passport.initialize());
-
-passport.use(new LocalStrategy(
-
-  //로그인 폼 name 수정
-  {
-    usernameField: 'email',
-    passwordField: 'pwd'
-  },
-
-  function(username, password, done) {
-
-    console.log('LocalStrategy', username, password);
-
-    if(username === authData.email){
-      if(password === authData.password){
-        console.log(authData);
-        return done(null, authData);
-      }
-      else {
-        return done(null, false, { message: 'Incorrect password.' });
-      }
-    } else {
-      return done(null, false, { message: 'Incorrect username.' });
-    }
-  }
-));
-
-app.post('/auth/login_process',
-passport.authenticate('local',
-{ successRedirect: '/',
-  failureRedirect: '/auth/login'
-}));
+var passport = require('./lib/passport')(app);
 
 app.get('*', function(request, response, next){
   fs.readdir('./data', function(error, filelist){
@@ -72,7 +31,7 @@ app.get('*', function(request, response, next){
 
 var indexRouter = require('./routes/index');
 var topicRouter = require('./routes/topic');
-var authRouter = require('./routes/auth');
+var authRouter = require('./routes/auth')(passport);
 
 app.use('/', indexRouter);
 app.use('/topic', topicRouter);

@@ -1,48 +1,76 @@
 var express = require('express');
 var router = express.Router();
-var path = require('path');
-var fs = require('fs');
-var sanitizeHtml = require('sanitize-html');
 var template = require('../lib/template.js')
-var auth = require('../lib/auth');;
 
-router.get('/login', function(request, response){
-  var title = 'WEB - login';
-  var list = template.list(request.list);
-  var html = template.HTML(title, list, `
-    <form action="/auth/login_process" method="post">
-      <p><input type="text" name="email" placeholder="email"></p>
-      <p><input type="password" name="pwd" placeholder="password"></p>
-      <p>
-        <input type="submit" value="login">
-      </p>
-    </form>
-  `, '');
-  response.send(html);
-});
+module.exports = function(passport){
 
-/*
-router.post('/login_process', function(request, response){
-  var post = request.body;
-  var email = post.email;
-  var password = post.pwd;
-  if (email === authData.email && password === authData.password){
-    request.session.is_logined = true;
-    request.session.nickname =authData.nickname;
-    request.session.save(function(){
-        response.redirect('/');
-    });
-  } else {
-    response.end("Fail");
-  }
-});
-*/
+  router.get('/login', function(request, response){
 
-
-router.get('/logout', function(request, response){
-  request.session.destroy(function (err) {
-    response.redirect('/');
+    var title = 'WEB - login';
+    var list = template.list(request.list);
+    var html = template.HTML(title, list, `
+      <form action="/auth/login_process" method="post">
+        <p><input type="text" name="email" placeholder="email"></p>
+        <p><input type="password" name="pwd" placeholder="password"></p>
+        <p>
+          <input type="submit" value="login">
+        </p>
+      </form>
+    `, '');
+    response.send(html);
   });
-});
+  
+  router.get('/logout', function(request, response){
+    request.logout();
+    //request.session.destory();
+    request.session.save(function(){
+      request.session.destroy(function(){
+        //request.session;
+        response.redirect('/');
+      })
+    });
+  });
+  
+  router.post('/login_process', function (req, res, next) {
+    passport.authenticate('local', function (err, user, info) {
+    
+    // if (info) { // info로 들어온 플래시 메세지 처리
+    //   req.session.flash.error = [info.message];
+    // } 
+    // else {
+    //   req.session.flash.success = ['Welcome.'];
+    // }
+  
+    if (err) {
+        return next(err);
+    }
+    
+    // user에 정보가 안들어 왔을 경우
+    if (!user) { 
+        return req.session.save(function (err) {
+            if (err) {
+                return next(err);
+            }
+            return res.redirect('/auth/login');
+        })
+    }
+  
+    // (아마) 첫번재 인자를 serializeUser로 넘기고 콜백으로 그 이후 처리를 작성
+    req.logIn(user, function (err) { 
+        if (err) {
+            return next(err);
+        }
+        return req.session.save(function (err) {
+            
+        if (err) {
+                return next(err);
+        }
+            return res.redirect('/');
+        });
+    });
+    })
+    (req, res, next);
+    });
 
-module.exports = router;
+  return router;
+};
