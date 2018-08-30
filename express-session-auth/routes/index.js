@@ -4,7 +4,7 @@ var template = require('../lib/template');
 var auth = require('../lib/auth');
 
 router.get('/', function(request, response) {
-
+  
   var title = 'Welcome';
   var description = 'Hello, Node.js';
   var list = template.list(request.list);

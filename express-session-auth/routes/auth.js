@@ -1,6 +1,10 @@
 var express = require('express');
 var router = express.Router();
-var template = require('../lib/template.js')
+var template = require('../lib/template.js');
+var shortid = require('shortid');
+
+//lowDB 사용
+var db =require('../lib/db');
 
 module.exports = function(passport){
 
@@ -18,17 +22,6 @@ module.exports = function(passport){
       </form>
     `, '');
     response.send(html);
-  });
-  
-  router.get('/logout', function(request, response){
-    request.logout();
-    //request.session.destory();
-    request.session.save(function(){
-      request.session.destroy(function(){
-        //request.session;
-        response.redirect('/');
-      })
-    });
   });
   
   router.post('/login_process', function (req, res, next) {
@@ -71,6 +64,69 @@ module.exports = function(passport){
     })
     (req, res, next);
     });
+  
+    router.get('/register', function(request, response){
+
+      var title = 'WEB - Register';
+      var list = template.list(request.list);
+      var html = template.HTML(title, list, `
+        <form action="/auth/register_process" method="post">
+          <p><input type="text" name="email" placeholder="email" value="blackdark13@naver.com"></p>
+          <p><input type="password" name="pwd" placeholder="password" value="1234"></p>
+          <p><input type="password" name="pwd2" placeholder="password" value="1234"></p>
+          <p><input type="text" name="displayname" placeholder="display name" value="dongkyu"></p>
+          <p>
+            <input type="submit" value="register">
+          </p>
+        </form>
+      `, '');
+      response.send(html);
+    });
+
+  router.post('/register_process', function(request, response){
+
+    var post = request.body;
+    var email = post.email;
+    var password = post.pwd;
+    var password2 = post.pwd2;
+    var displayName = post.displayname;
+        
+    // fs.writeFile(`data/${title}`, description, 'utf8', function(err){
+    //   response.redirect(`/topic/${title}`);
+    // });
+
+    var user = {
+      id:shortid.generate(),
+      email:email,
+      password:password,
+      displayname:displayName,
+    }
+
+    db.get('users').push(user).write();
+
+    request.logIn(user, function (err) {
+      if (err) {
+          return err;
+      }
+      request.session.save(function(err1){
+        if(err1){
+          return err1;
+        }
+        response.redirect(`/`);
+        })
+      })
+  });
+
+  router.get('/logout', function(request, response){
+    request.logout();
+    //request.session.destory();
+    request.session.save(function(){
+      request.session.destroy(function(){
+        //request.session;
+        response.redirect('/');
+      })
+    });
+  });
 
   return router;
 };

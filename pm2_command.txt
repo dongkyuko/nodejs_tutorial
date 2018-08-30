@@ -3,3 +3,4 @@ start
 
 ignore folder
 - pm2 start main.js --watch --ignore-watch="sessions/*"  --no-daemon
+- pm2 start main.js --watch --ignore-watch="sessions/* db.json"  --no-daemon
