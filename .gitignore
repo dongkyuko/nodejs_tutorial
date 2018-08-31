@@ -4,5 +4,6 @@
 /nodejs_cookie_tutorial/node_modules
 /nodejs_express/node_modules
 /nodejs_mysql/node_modules
-/nodejs_session/node_modules
+/nodejs_session/
+/express-react/node_modules
 pm2_command.txt
