@@ -1,48 +1,18 @@
 {
   "users": [
     {
-      "id": "9EodaVXZB",
+      "id": "Ss47I6vGo",
       "email": "blackdark13@naver.com",
-      "password": "1234",
+      "password": "$2b$10$UqDuIUQiKQids5Hq3ZXGJeKsngKzLARq7mswj3vdSAGePXyGpkbii",
       "displayname": "dongkyu"
-    },
-    {
-      "id": "9Nd22onu3",
-      "email": "blackdark13@naver.com",
-      "password": "1234",
-      "displayname": "Hyunkyu"
-    },
-    {
-      "id": "k172vX3j4",
-      "email": "blackdark13@naver.com",
-      "password": "1234",
-      "displayname": "DDDD"
-    },
-    {
-      "id": "g28p1J50l",
-      "email": "blackdark13@naver.com",
-      "password": "1234",
-      "displayname": "dfdfdf"
     }
   ],
   "topics": [
     {
-      "id": "QI7E6XeSa",
-      "title": "sdsdsd",
-      "description": "sdsdsdsd",
-      "user_id": "k172vX3j4"
-    },
-    {
-      "id": "veh5A63F3",
-      "title": "sdfdfsdf",
-      "description": "sdfdsfds",
-      "user_id": "k172vX3j4"
-    },
-    {
-      "id": "VjX9HIv0f",
-      "title": "dfdfdf",
-      "description": "dfdfdf",
-      "user_id": "k172vX3j4"
+      "id": "0yYDpGqG2",
+      "title": "NodeJS",
+      "description": "NodeJS is...",
+      "user_id": "Ss47I6vGo"
     }
   ]
 }
