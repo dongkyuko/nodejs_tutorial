@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 var template = require('../lib/template.js');
 var shortid = require('shortid');
+var bcrypt = require('bcrypt');
 
 //lowDB 사용
 var db =require('../lib/db');
@@ -95,26 +96,38 @@ module.exports = function(passport){
     //   response.redirect(`/topic/${title}`);
     // });
 
-    var user = {
-      id:shortid.generate(),
-      email:email,
-      password:password,
-      displayname:displayName,
-    }
+    if (password !== password2){
+      return response.redirect('/auth/register');
+    } 
+    
+    else {
 
-    db.get('users').push(user).write();
-
-    request.logIn(user, function (err) {
-      if (err) {
-          return err;
-      }
-      request.session.save(function(err1){
-        if(err1){
-          return err1;
+      bcrypt.hash(password, 10, function(err, hash) {
+        // Store hash in your password DB.
+        var user = {
+          id:shortid.generate(),
+          email:email,
+          password:hash,
+          displayname:displayName,
         }
-        response.redirect(`/`);
-        })
-      })
+        db.get('users').push(user).write();
+  
+        request.logIn(user, function (err) {
+          if (err) {
+              return err;
+          }
+          request.session.save(function(err1){
+            if(err1){
+              return err1;
+            }
+            return response.redirect(`/`);
+            })
+          })
+      });
+
+      
+
+    }
   });
 
   router.get('/logout', function(request, response){

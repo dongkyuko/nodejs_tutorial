@@ -1,4 +1,5 @@
 var db =require('../lib/db');
+var bcrypt = require('bcrypt');
 
 module.exports = function(app){
 
@@ -39,12 +40,25 @@ module.exports = function(app){
 
     function(email, password, done) {
         
-        var user = db.get('users').find({email:email, password:password}).value();
+        var user = db.get('users').find({email:email}).value();
         
         if (user) {
-            return done(null, user);
-        } else {
-            return done(null, false, { message: 'Incorrect email or password.' });
+            bcrypt.compare(password, user.password, function(err, result){
+                
+                console.log(result);
+                
+                if(result){
+                    return done(null, user);
+                }
+
+                else {
+                    return done(null, false, { message: 'Incorrect password.' });
+                }
+            });
+        } 
+        
+        else {
+            return done(null, false, { message: 'Incorrect email.' });
         }
         
     }
