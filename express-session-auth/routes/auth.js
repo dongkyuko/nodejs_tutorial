@@ -124,9 +124,6 @@ module.exports = function(passport){
             })
           })
       });
-
-      
-
     }
   });
 
