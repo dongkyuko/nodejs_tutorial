@@ -4,24 +4,27 @@ const path = require('path');
 // const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const session = require('express-session');
+const MySQLStore = require('express-mysql-session')(session);
 
+const dbInfo = require('./lib/db');
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 const countRouter = require('./routes/count');
 
 const app = express();
 
+var sessionStore = new MySQLStore(dbInfo);
 app.use(session({
   secret: '12321fdsjkfjdsklfjsdklfjsdflkjsdl1@#$#@$',
   resave: false,
   saveUninitialized: true,
   // cookie: { secure: true }
+  store: sessionStore
 }))
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
-
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -33,7 +36,7 @@ app.use('/users', usersRouter);
 app.use('/counts', countRouter);
 
 
-app.get('/count', function(req, res){
+app.get('/count', function(req, res){  
   if(req.session.count){
     req.session.count ++;
   } else {

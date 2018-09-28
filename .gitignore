@@ -4,7 +4,7 @@
 /nodejs_cookie_tutorial/node_modules
 /nodejs_express/node_modules
 /nodejs_mysql/node_modules
-/nodejs_session/node_modules
+/nodejs_session/session_tutorial/node_modules
 /express-react/node_modules
 /react_tutorial/movie_app/node_modules
 /react_tutorial/react-backend/node_modules
