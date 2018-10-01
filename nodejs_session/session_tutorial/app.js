@@ -5,15 +5,20 @@ const path = require('path');
 const logger = require('morgan');
 const session = require('express-session');
 const MySQLStore = require('express-mysql-session')(session);
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
 
 const dbInfo = require('./lib/db');
 const indexRouter = require('./routes/index');
 const usersRouter = require('./routes/users');
 const countRouter = require('./routes/count');
 
+const passport = require('passport')
+const LocalStrategy = require('passport-local').Strategy;
 const app = express();
 
-var sessionStore = new MySQLStore(dbInfo);
+const sessionStore = new MySQLStore(dbInfo);
+
 app.use(session({
   secret: '12321fdsjkfjdsklfjsdklfjsdflkjsdl1@#$#@$',
   resave: false,
@@ -21,6 +26,9 @@ app.use(session({
   // cookie: { secure: true }
   store: sessionStore
 }))
+
+app.use(passport.initialize());
+app.use(passport.session());
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -35,7 +43,68 @@ app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/counts', countRouter);
 
+//passport 설정
 
+passport.serializeUser(function(user, done) {
+  return done(null, user.username);
+});
+
+passport.deserializeUser(function(id, done) {
+  return done(null, id);
+  // User.findById(id, function(err, user) {
+  // });
+});
+
+passport.use(new LocalStrategy(
+  function(username, password, done) {
+
+    bcrypt.hash('1234', saltRounds, (err, hash) => {
+      err => {
+        console.log(err);
+        return err;
+      }
+  
+      const user = {
+        id: 1,
+        username: "kodongkyu",
+        password: hash, 
+        displayName: "Dongkyu"
+      };
+        
+      const username_check = username;
+      const password_check = password;
+  
+      bcrypt.compare(password_check, hash, (err, res_1) => {
+        err => {
+          console.log(err);
+          return err
+        };
+        if(username_check === user.username) {
+          if (res_1) {
+            return done(null, user);
+          } else {
+            return done(null, false);
+          }
+        } else {
+          return done(null, false);
+        }
+      });
+
+    });
+  }
+));
+
+app.post('/auth/login',
+  passport.authenticate(
+    'local', 
+    { 
+      successRedirect: '/welcome',
+      failureRedirect: '/auth/login',
+      failureFlash: false 
+    })
+);
+
+//URL 설정
 app.get('/count', function(req, res){  
   if(req.session.count){
     req.session.count ++;
@@ -52,6 +121,7 @@ app.get('/tmp', function(req, res){
 
 app.get('/auth/login', function(req, res){
   // res.send(req.session.count);
+
   const output = `
   <h1>Login</h1>
   <form action="/auth/login" method="post">
@@ -63,30 +133,54 @@ app.get('/auth/login', function(req, res){
   res.send(output);
 });
 
-app.post('/auth/login', function(req, res){
-  // res.send(req.session.count);
+// app.post('/auth/login', function(req, res){
+//   // res.send(req.session.count);
 
-  const user = {
-    username: "kodongkyu",
-    password: '1234',
-    displayName: "Dongkyu"
-  };
+//   bcrypt.hash('1234', saltRounds, (err, hash) => {
+//     err => {
+//       console.log(err);
+//       return err;
+//     }
 
-  const username = req.body.username;
-  const password = req.body.password;
+//     const user = {
+//       username: "kodongkyu",
+//       password: hash, 
+//       displayName: "Dongkyu"
+//     };
 
-  if( username === user.username && password === user.password){
-    req.session.displayName = user.displayName;
-    res.redirect("/welcome");
-  } else {
-    res.send(`Who are you? <p><a href="/auth/login">Login</a></p>`);
-  }
-});
+//     const username = req.body.username;
+//     const password = req.body.password;
+
+//     bcrypt.compare(password, hash, (err, res_1) => {
+//       err => {
+//         console.log(err);
+//         return err
+//       };
+//       if(username == user.username) {
+//         if (res_1) {
+//           req.session.displayName = user.displayName;
+//           req.session.save(() => res.redirect("/welcome"));
+//         } else {
+//           return res.send(`Who are you?(Wrong Password) <p><a href="/auth/login">Login</a></p>`);
+//         }
+//       } else {
+//         return res.send(`Who are you? (Wrong Username) <p><a href="/auth/login">Login</a></p>`);
+//       }
+//     })
+//     // if( username === user.username && password === user.password){
+//     //   req.session.displayName = user.displayName;
+//     //   req.session.save(() => res.redirect("/welcome"));
+//     // } else {
+//     //   res.send(`Who are you? <p><a href="/auth/login">Login</a></p>`);
+//     // }
+//   });
+// });
 
 app.get('/welcome', (req,res) => 
   {
-    if(req.session.displayName){
-      res.send(`<h1>Hello, ${req.session.displayName}</h1>
+    console.log(req.user);
+    if(req.user){
+      res.send(`<h1>Hello, ${req.user}</h1>
       <p><a href="/auth/logout">Logout</a></p>`);
     } else {
       res.send(`<h1>Welcome</h1>
@@ -97,9 +191,12 @@ app.get('/welcome', (req,res) =>
 );
 
 app.get('/auth/logout', (req, res) => {
-  req.session.destroy(err => res.send(err));
-  res.redirect('/welcome')
+  req.logout();
+  // req.session.destroy(err => res.send(err));
+  // req.session.save(() => res.redirect("/welcome"));
+  req.session.save(()=>res.redirect("/welcome"))
 });
+
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
   next(createError(404));
