@@ -3,16 +3,14 @@ var https = require("https");
 var credential = 'Basic '+new Buffer(c.APPID+':'+c.APIKEY).toString('base64');
 
 
-var data = {
+const data = {
   "sender"     : c.SENDER,
   "receivers"  : c.RECEIVERS,
   "content"    : c.CONTENT
 }
-var body = JSON.stringify(data);
+const body = JSON.stringify(data);
 
-//console.log(body);
-
-var options = {
+const options = {
   host: 'api.bluehouselab.com',
   port: 443,
   path: '/smscenter/v1.0/sendsms',
@@ -23,21 +21,21 @@ var options = {
   },
   method: 'POST'
 };
-var req = https.request(options, function(res) {
-  console.log(res.statusCode);
-  var body = "";
-  res.on('data', function(d) {
+const sms_req = https.request(options, function(sms_res) {
+  console.log(sms_res.statusCode);
+  let body = "";
+  sms_res.on('data', function(d) {
     body += d;
   });
-  res.on('end', function(d) {
-  	if(res.statusCode==200)
+  sms_res.on('end', function(d) {
+  	if(sms_res.statusCode==200)
 		console.log(JSON.parse(body));
 	else
 		console.log(body);
   });
 });
-req.write(body);
-req.end();
-req.on('error', function(e) {
+sms_req.write(body);
+sms_req.end();
+sms_req.on('error', function(e) {
 	console.error(e);
 });
