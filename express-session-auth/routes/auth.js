@@ -62,8 +62,7 @@ module.exports = function(passport){
             return res.redirect('/');
         });
     });
-    })
-    (req, res, next);
+    })(req, res, next);
     });
   
     router.get('/register', function(request, response){
