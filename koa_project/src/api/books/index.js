@@ -12,10 +12,13 @@ books.get('/:id', booksCtrl.get);
 //데이터 만들기
 books.post ('/', booksCtrl.create);
 
-books.delete ('/', booksCtrl.delete);
+//데이터 지우기
+books.delete ('/:id', booksCtrl.delete);
 
-books.put ('/', booksCtrl.replace);
+//Replace
+books.put ('/:id', booksCtrl.replace);
 
-books.patch ('/', booksCtrl.update);
+//수정
+books.patch ('/:id', booksCtrl.update);
 
 module.exports = books;

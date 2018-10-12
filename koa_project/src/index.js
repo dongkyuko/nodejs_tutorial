@@ -14,6 +14,7 @@ mongoose.Promise = global.Promise; //Node의 네이티브 Promise 사용
 // mongodb 연결
 mongoose.connect(process.env.MONGO_URI, {
     // useMongoClient: true
+    useNewUrlParser: true
 }).then(
     (response) => {
         console.log('Successfully connected to mongodb');

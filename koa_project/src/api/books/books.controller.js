@@ -1,19 +1,24 @@
 const Book = require('models/book');
+const Joi = require('joi');
+const { Types: { ObjectId } } = require('mongoose'); //const ObjectId = require('mongoose').Types.ObjectId 코드와 동일
 
 //데이터 하나만 가져오기
 exports.get = async (ctx) => {
     
     const { id } = ctx.params; //URL 파라미터에서 id 값을 읽어옴
 
+    console.log(ctx.params);
+    console.log(id);
+
     let book;
 
     try {
         book = await Book.findById(id).exec();
     } catch(e) {
-        console.log(e);
+        // console.log(e);
         if(e.name === 'CastError') {
             ctx.status = 400;
-            return
+            return;
         }
         //HTTP 상태 500와 Internal Error 라는 메시지를 반환하고 에러를 기록합니다.
         return ctx.throw(500, e);
@@ -87,14 +92,96 @@ exports.create = async (ctx) => {
     ctx.body = book;
 }
 
-exports.delete = (ctx) => {
-    ctx.body = "deleted";
+exports.delete = async (ctx) => {
+
+    const { id } = ctx.params;
+
+    try {
+        await Book.findByIdAndRemove(id).exec();
+    } catch(e) {
+        // console.log(e);
+        if(e.name === 'CastError') {
+            ctx.status = 400;
+            return;
+        }
+    }
+
+    ctx.status = 204;
 }
 
-exports.replace = (ctx) => {
-    ctx.body = "replaced";
+exports.replace = async (ctx) => {
+
+    const { id } = ctx.params; // URL 파라미터에서 id 값 읽어오기
+
+    if(!ObjectId.isValid(id)) {
+        ctx.status = 400; // Bad Request
+        return;
+    }
+
+    // 검증 할 스키마를 준비
+    const schema = Joi.Object().keys({
+        // 뒤에 required () 를 붙여주면 필수 항목이라는 의미
+        title: Joi.string().required(),
+        authors: Joi.array().items(Joi.Object().keys({
+            name: Joi.string().required(),
+            email: Joi.string().email.required()
+        })),
+        publishedDate: Joi.date().required(),
+        price: Joi.number().required(),
+        tags: Joi.array.items((Joi.string()).required)
+    });
+
+    //그 다음엔 validate를 통하여 검증
+    const result = Joi.validate(ctx.request.body, schema); // 첫번째 파라미터는 검증할 객체이고, 두번째는 스키마
+
+    //스키마에 문제가 있다면
+    if(result.error){
+        ctx.status = 400; //Bad Request
+        ctx.body = result.error;
+        return;
+    }
+
+    let book;
+
+    try {
+        // 아이디로 찾아서 업데이트
+        // 파라미터는 (아이디, 변경 할 값, 설정) 
+        book = await Book.findByIdAndUpdate(id, ctx.request.body, {
+            upsert: true, // 이 값을 넣어주면 데이터가 존재하지 않으면 새로 만들어줌
+            new: true // 이 값이 없으면 ctx.body = book 했을때 업데이트 전의 데이터를 보여줌
+        });
+    } catch(e) {
+        //HTTP 상태 500와 Internal Error 라는 메시지를 반환하고 에러를 기록합니다.
+        return ctx.throw(500, e);
+    }
+
+    ctx.body = book;
 }
 
-exports.update = (ctx) => {
-    ctx.body = "updated";
+exports.update = async (ctx) => {
+
+    const { id } = ctx.params; // URL 파라미터에서 id 값 읽어오기
+
+    console.log(ObjectId.isValid('sdfsdfsd'));
+    
+    if(!ObjectId.isValid(id)) {
+        ctx.status = 400; // Bad Request
+        return;
+    }
+
+    let book;
+
+    try {
+        // 아이디로 찾아서 업데이트
+        // 파라미터는 (아이디, 변경 할 값, 설정) 
+        book = await Book.findByIdAndUpdate(id, ctx.request.body, {
+            // upsert 기본값은 false
+            new: true // 이 값이 없으면 ctx.body = book 했을때 업데이트 전의 데이터를 보여줌
+        });
+    } catch(e) {
+        //HTTP 상태 500와 Internal Error 라는 메시지를 반환하고 에러를 기록합니다.
+        return ctx.throw(500, e);
+    }
+
+    ctx.body = book;
 }
