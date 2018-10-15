@@ -10,6 +10,16 @@ const api = require('./api');
 const mongoose = require("mongoose");
 const bodyParser = require('koa-bodyparser');
 
+// //비밀번호 해쉬
+// const crypto = require('crypto');
+
+// const password = 'abc1234';
+// const secret = 'MysecretKey1$1$234';
+
+// const hashed = crypto.createHmac('sha256', secret).update(password).digest('hex');
+
+// console.log(hashed);
+
 mongoose.Promise = global.Promise; //Node의 네이티브 Promise 사용
 // mongodb 연결
 mongoose.connect(process.env.MONGO_URI, {
@@ -32,6 +42,6 @@ router.use('/api', api.routes());
 app.use(router.routes()).use(router.allowedMethods());;
 
 app.listen(port, () => {
-    console.log("Kora server is listening to port 4000");
+    console.log("Koa server is listening to port 4000");
     
 });

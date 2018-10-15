@@ -1,9 +1,5 @@
 var mysql      = require('mysql');
 var connection = mysql.createConnection({
-  host     : 'devteammanager.chvzo3pl27ae.ap-northeast-2.rds.amazonaws.com',
-  user     : 'qmit',
-  password : 'qmitqmit',
-  database : 'DEV_Dongkyu_Nodejs_Exam'
 });
 
 connection.connect();

@@ -10,3 +10,4 @@
 /react_tutorial/react-backend/node_modules
 pm2_command.txt
 /koa_project/node_modules
+/koa_project/.env
