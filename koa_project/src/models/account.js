@@ -2,12 +2,11 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 const crypto = require('crypto');
 
-// const hash = password => crypto.createHmac('sha256', process.env.SECRET_KEY).update(password).digest('hex');
+const hash = password => crypto.createHmac('sha256', process.env.SECRET_KEY).update(password).digest('hex');
 
-function hash(password) {
-    return crypto.createHmac('sha256', process.env.SECRET_KEY).update(password).digest('hex');
-}
-
+// function hash(password) {
+//     return crypto.createHmac('sha256', process.env.SECRET_KEY).update(password).digest('hex');
+// }
 
 const Account = new mongoose.Schema({
     profile: {
@@ -36,6 +35,7 @@ const Account = new mongoose.Schema({
 // mongoose.model('콜렉션 이름', 스키마);
 //this는 사용하지 않음
 let schemaAccount = mongoose.model('schemaAccount', Account);
+//methods를 사용하기 위해 정의
 
 // 객체에 내장되어있는 값을 사용할 때 는 객체명.키 이런식으로 쿼리하면 됨
 Account.statics.findByUsername = username => schemaAccount.findOne({'profile.username': username}).exec();
@@ -66,18 +66,17 @@ Account.statics.localRegister = ({ username, email, password }) => {
 };
 
 // Account.methods.validatePassword = password => {
-//     console.log('a');
 //     //함수로 전달받은 password 의 해시값과 데이터에 담겨있는 해시값 비교
 //     const hashed = hash(password);
-//     return schemaAccount.password == hashed;
-// }
-
-// Account.methods.validatePassword = function(password){
-//     // console.log('a');
-//     // //함수로 전달받은 password 의 해시값과 데이터에 담겨있는 해시값 비교
-//     // const hashed = hash(password);
-//     // return this.password == hashed;
-//     return password;
+//     return hashed;
+//     // return schemaAccount.password == hashed;
 // };
+
+Account.methods.validatePassword = function(password){
+    // console.log('a');
+    // //함수로 전달받은 password 의 해시값과 데이터에 담겨있는 해시값 비교
+    const hashed = hash(password);
+    return schemaAccount.password == hashed;
+};
 
 module.exports = mongoose.model('Account', Account);

@@ -41,7 +41,6 @@ exports.localRegister = async (ctx) => {
         return;
     }
 
-
     //계정 생성
     let account = null;
     try {
@@ -75,22 +74,29 @@ exports.localLogin = async (ctx) => {
 
     //이메일로 계정 찾기
     try {
-        
         account = await Account.findByEmail(email);
     } catch (e) {
         console.log('이메일 없음');
         ctx.throw(500, e);
     }
+        
 
-    const a = await Account.validatePassword(password);
-    console.log(a);
-    
-    // //유저가 존재하지않거나 비밀번호가 일치하지 않음
-    // if(!account || ! await Account.validatePassword(password)) {
-    //     console.log('유저가 존재하지않거나 비밀번호 일치하지 않음');
-    //     ctx.status = 403; 
-    //     return;
+    //비밀번호 일치 여부 확인
+
+    // try {
+    //     await Account.validatePassword(password)  
+    // } catch(e) {
+    //     console.log('비밀번호 맞지 않음');
+    //     ctx.throw(403, e);
     // }
+
+    //유저가 존재하지않거나 비밀번호가 일치하지 않음
+    if(!account || ! await Account.validatePassword(password)) {
+        console.log('유저가 존재하지않거나 비밀번호 일치하지 않음');
+        ctx.status = 403; 
+        return;
+    }
+
     ctx.body = account.profile;
 };
 
