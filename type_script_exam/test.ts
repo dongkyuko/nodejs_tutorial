@@ -5,3 +5,5 @@ class Hi {
 }
 
 new Hi();
+
+let myName = 'mark';
