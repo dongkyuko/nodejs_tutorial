@@ -1,9 +1,10 @@
-class Hi {
-    constructor(){
-        console.log('test');
-    }
-}
+// class Hi {
+//     constructor(){
+//         console.log('test');
+//     }
+// }
+// new Hi();
+// let myName = 'mark';
 
-new Hi();
+const tu: [number, string] = [ 0, "a"]
 
-let myName = 'mark';

@@ -12,3 +12,4 @@ pm2_command.txt
 /koa_project/node_modules
 /koa_project/.env
 /type_script_exam/node_modules
+/tic-tac-toe-master/node_modules
